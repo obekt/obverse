@@ -1,0 +1,220 @@
+<html>
+<head>
+  <title>ObVerse Land by obekt</title>
+  <script id="fxhash-snippet">
+  //---- do not edit the following code (you can indent as you wish)
+  let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+  var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+  let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+  let fxhashTrunc = fxhash.slice(2)
+  let regex = new RegExp(".{" + ((fxhashTrunc.length/4)|0) + "}", 'g')
+  let hashes = fxhashTrunc.match(regex).map(h => b58dec(h))
+  let sfc32 = (a, b, c, d) => {
+    return () => {
+      a |= 0; b |= 0; c |= 0; d |= 0
+      var t = (a + b | 0) + d | 0
+      d = d + 1 | 0
+      a = b ^ b >>> 9
+      b = c + (c << 3) | 0
+      c = c << 21 | c >>> 11
+      c = c + t | 0
+      return (t >>> 0) / 4294967296
+    }
+  }
+  var fxrand = sfc32(...hashes)
+  // true if preview mode active, false otherwise
+  // you can append preview=1 to the URL to simulate preview active
+  var isFxpreview = new URLSearchParams(window.location.search).get('preview') === "1"
+  // call this method to trigger the preview
+  function fxpreview() {
+    console.log("fxhash: TRIGGER PREVIEW")
+  }
+  //---- /do not edit the following code
+</script>
+<script src="p5.min.js"></script>
+</head>
+<body>
+  <!-- other HTML content -->
+
+  <script>
+
+    // Random Map NFT generation by obekt.eth
+    let map = null;
+    let noiseScale = 1/Math.floor(100,200);
+    let snow = "#e3e3e3";
+    let sand = "#eecda3";
+    let grass = "#7ec850";
+    let trees = "#7AB66E";
+    let stone = "#b0b7ba";
+    let ocean = "#63abc9";
+    let cwidth = 600;
+    let cheight = 600;
+    let city = "";
+
+    let xc = 0;
+    let yc = 0;
+    let population = 0;
+    let oceanCount = 0;
+    let stoneCount = 0;
+    let treesCount = 0;
+    let randomNumber = getRandomInt(10000);
+
+    function getRandomInt(max) {
+      return Math.floor(fxrand() * max);
+    }
+
+    function getRandomCityName(randomNumber) {
+      // Array of unique city name prefixes
+      const prefixes = [
+        "New",
+        "Old",
+        "West",
+        "North",
+        "South",
+        "East",
+        "Northwest",
+        "Northeast",
+        "Southwest",
+        "Southeast",
+        "Midwest",
+        "Mid",
+        "Central"
+      ];
+      // Array of unique city name suffixes
+      const suffixes = [
+        "town",
+        "ville",
+        "berg",
+        "bury",
+        "port",
+        "dale",
+        "field",
+        "view"
+      ];
+
+      // Get a random prefix and suffix
+      const prefix = prefixes[randomNumber%prefixes.length];
+      const suffix = suffixes[randomNumber%suffixes.length];
+
+      // Return the random city name
+      return prefix + suffix;
+    }
+
+
+    function setup()
+    {
+      createCanvas(cwidth, cheight);
+      
+      noStroke();
+      
+      background(0);
+      
+      noiseDetail(5, 0.3 + ( (randomNumber/10000) / 2.1));
+      
+      noiseSeed(randomNumber);
+      
+      makeMap();
+      
+      drawMap();
+      
+      xc = int(randomNumber / 100);
+      yc = randomNumber%100;
+      city=getRandomCityName(randomNumber);
+      population = int(randomNumber%12)*randomNumber;
+      let waterPercent = int(oceanCount/(cwidth*cheight)*100);
+      let stonePercent = int(stoneCount/(cwidth*cheight)*100);
+      text(city, 500 ,580);
+      window.$fxhashFeatures = {
+        "X coordinate": xc,
+        "Y coordinate": yc,
+        "trees": getFeatureString(treesCount),
+        "water": getFeatureString(oceanCount),
+        "stones": getFeatureString(stoneCount),
+        "population": getFeatureString(population),
+        "city": city
+      }
+    }
+
+    function getFeatureString(value) {
+      if (value < 10000) return "low"
+      if (value < 50000) return "medium"
+      else return "high"
+    }
+
+    function makeMap()
+    {
+      map = [];
+      for(let i = 0; i < cwidth; i++)
+      {
+        map[i] = [];
+        for(let j = 0; j < cheight; j++)
+        {
+          map[i][j] = pickColor(i, j);
+        }
+      }
+    }
+
+    function pickColor(i, j)
+    {
+      let scale = Math.floor(1,5);
+      let h = noise((i)*noiseScale,
+                   (j)*noiseScale);
+      let c = "#facade";
+      
+      if(h < 0.2)
+      {
+        c = snow;
+      } 
+      else if(h < 0.3)
+      {
+          c = stone;
+          stoneCount++;
+      }
+      else if(h < 0.4)
+      {
+          c = trees;
+          treesCount++;
+      }
+      else if(h < 0.5)
+      {
+          c = grass;
+      }
+      else if(h < 0.6)
+      {
+          c = sand;
+      }
+      else if (h < 0.7)
+      {  
+          c = ocean;
+          oceanCount++;
+      }
+      else
+      {
+        c = ocean;
+        oceanCount++;
+      }
+      
+      return color(c);
+    }
+
+    function drawMap()
+    {
+      for(let i = 0; i < cwidth; i++)
+      {
+        for(let j = 0; j < cheight; j++)
+        {
+          set(i, j, map[i][j])
+        }
+      }
+      updatePixels();
+    }
+
+
+
+  </script>
+
+
+
+
+</body>
+</html>
